@@ -17,12 +17,25 @@ class VoiceVox
   end
 
   # 指定されたテキストを音声に変換。
+  # ブロックを渡すと、クエリをカスタマイズできる。
   # * +spearker+ - 話者ID。+speakers+メソッドで得られる。(default: 1)
   # * +text+ - 音声に変換するテキスト文字列。
-  def speak(speaker: 1, text:)
-    res = audio_query(speaker: speaker, text: text)
-    wav_stream = synthesis(speaker: speaker, query: res)
+  def speak(speaker: 1, text:, &modify)
+    query = audio_query(speaker: speaker, text: text)
+    query = modify.call(query) if modify
+    wav_stream = synthesis(speaker: speaker, query: query)
     player(stream: wav_stream)
+  end
+
+  # 指定されたテキストを音声に変換。
+  # ブロックを渡すと、クエリをカスタマイズできる。
+  # * +spearker+ - 話者ID。+speakers+メソッドで得られる。(default: 1)
+  # * +text+ - 音声に変換するテキスト文字列。
+  # * 戻り値 - wavファイルストリーム
+  def speak_wav_stream(speaker: 1, text:, &modify)
+    query = audio_query(speaker: speaker, text: text)
+    query = modify.call(query) if modify
+    return synthesis(speaker: speaker, query: query)
   end
 
   # wavファイルのストリームを再生。
@@ -37,7 +50,6 @@ class VoiceVox
   end
 
   # テキストを+synthesis+に渡せるクエリJSON(連想配列)に変換。
-  # ブロックを渡すと、クエリのkanaを更新し、アクセントを再生成できる。
   # * +speaker+ - 話者ID。+speakers+メソッドで得られる。(default: 1)
   # * +text+ - クエリに変換するテキスト文字列。
   # * 戻り値 - クエリ連想配列
@@ -46,8 +58,7 @@ class VoiceVox
     valid_response?(res)
     query = JSON.parse(res.body)
     if modify
-      query['kana'] = modify.call(query['kana'])
-      query['accent_phrases'] = accent_phrases(speaker: speaker, text: query['kana'], is_kana: true)
+      query = modify.call(query)
     end
     return query
   end
@@ -220,4 +231,10 @@ class VoiceVox
 
   # 正常なレスポンスが得られなかった時に発生するエラー。
   class ProtocolError < StandardError; end
+end
+
+class VoiceVox::Speaker
+end
+
+class VoiceVox::Query
 end

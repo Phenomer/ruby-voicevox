@@ -22,13 +22,4 @@ end
 pp(speaker)
 
 # シンプルに再生
-#vvc.speak(speaker: speaker['id'], text: 'こんにちは')
-
-# AquesTalk 記法で取得・編集してから再生
-query = vvc.audio_query(speaker: speaker['id'], text: 'こんにちは') do |text|
-  # ここで編集
-  pp text
-  text
-end
-wav_stream = vvc.synthesis(speaker: speaker['id'], query: query)
-vvc.player(stream: wav_stream)
+vvc.speak(speaker: speaker['id'], text: 'こんにちは')

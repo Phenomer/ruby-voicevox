@@ -23,6 +23,7 @@ $ ./run
 ```
 
 ## インストール
+(まだ準備中です。)
 
 ```sh
 $ gem install voicevox
